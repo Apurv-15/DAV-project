@@ -1,0 +1,6 @@
+{
+  "name": "GLOBAL INSIGHT — Global E-Commerce Consumer Behaviour & Shopping Trends Analytics",
+  "description": "Automated data analytics, profiling, cleaning, visualization, and AI-powered business intelligence platform for global e-commerce datasets up to 1.5M+ records.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
