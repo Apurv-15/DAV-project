@@ -24,8 +24,10 @@ import {
 import { generateChartRecommendations } from './chartRecommender';
 import { buildSchemaMapping, profileRowsSample } from './schemaMapper';
 import {
+  buildComparisonAnalyticalResponse,
   buildEntityAnalyticalResponse,
   buildEntityIndexForDataset,
+  resolveComparisonFromQuestion,
   resolveEntityFromQuestion,
 } from './universalQueryEngine';
 
@@ -1898,7 +1900,17 @@ export function buildStatisticalEvidenceForQuestion(
   inlineChart?: InlineChartPayload;
   breakdownTable?: BreakdownTablePayload;
 } {
-  // 1. Check Universal SKU / Product / Food Item Omni-Query Resolver first
+  // 0. Check Head-to-Head Comparison Resolver first (e.g., "leather jacket vs cotton jacket")
+  const comparisonMatch = resolveComparisonFromQuestion(dataset, question);
+  if (comparisonMatch) {
+    return buildComparisonAnalyticalResponse(
+      dataset,
+      comparisonMatch.left,
+      comparisonMatch.right
+    );
+  }
+
+  // 1. Check Universal SKU / Product / Food Item Omni-Query Resolver
   const entityMatch = resolveEntityFromQuestion(dataset, question);
   if (entityMatch) {
     return buildEntityAnalyticalResponse(dataset, entityMatch);

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./components/plot-reveal/plot-reveal.css";
 
 @layer base {
   :root {
@@ -11,6 +12,24 @@
     --text-secondary: hsl(215, 25%, 32%);
     --text-muted: #71717A;
     --accent-primary: #000000;
+
+    /* Blueprint Pencil Sketch-to-Reality Tokens */
+    --paper: #fafaf8;
+    --card: #ffffff;
+    --ink: #0a0c10;
+    --mid: #565b64;
+    --muted: #8b909a;
+    --line: #e7e9ef;
+    --plot: #2e6fff;
+    --positive: #16834a;
+    --positive-soft: #e6f5ec;
+    --well: #f3f4f6;
+    --previous: #cbd5e1;
+    --blue-1: #dbe5ff;
+    --blue-2: #b2c7ff;
+    --blue-3: #7c9fff;
+    --blue-4: #3d6ef5;
+    --blue-5: #1d47c8;
   }
 
   body {
@@ -25,6 +44,10 @@
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
+}
+
+.hatch {
+  background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.32) 0 1.5px, transparent 1.5px 6px);
 }
 
 .font-serif-editorial {

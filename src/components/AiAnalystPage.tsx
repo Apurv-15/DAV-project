@@ -60,6 +60,7 @@ const buildWelcomeMessage = (dataset: DatasetEntry): ChatMessage => {
 };
 
 const SUGGESTED_QUESTIONS = [
+  'Leather Jacket vs Cotton Jacket',
   "What's the growth for AirPods Max sales?",
   "What's the growth for Organic Matcha?",
   "What's the growth for Extra Virgin Olive Oil?",
@@ -67,7 +68,6 @@ const SUGGESTED_QUESTIONS = [
   'Which country generates the highest revenue?',
   'Which category has the highest sales?',
   'What is the relationship between discounts and order quantities?',
-  'Which product categories are declining?',
 ];
 
 export const AiAnalystPage: React.FC<AiAnalystPageProps> = ({ dataset }) => {
@@ -155,6 +155,7 @@ export const AiAnalystPage: React.FC<AiAnalystPageProps> = ({ dataset }) => {
   }, [dataset.entityIndex, catalogSearch]);
 
   const handleResetThread = () => {
+    setIsLoading(false);
     setThreadsByDataset((prev) => ({
       ...prev,
       [dataset.id]: [buildWelcomeMessage(dataset)],
@@ -187,11 +188,14 @@ export const AiAnalystPage: React.FC<AiAnalystPageProps> = ({ dataset }) => {
     setIsLoading(true);
 
     const computed = buildStatisticalEvidenceForQuestion(dataset, trimmed);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 2500);
 
     try {
       const response = await fetch(`/api/datasets/${dataset.id}/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           question: trimmed,
           statisticalContext: computed.compactContextJson,
@@ -203,6 +207,7 @@ export const AiAnalystPage: React.FC<AiAnalystPageProps> = ({ dataset }) => {
         }),
       });
 
+      window.clearTimeout(timeoutId);
       const data = await response.json();
       const answerText =
         data && typeof data.answer === 'string' && data.answer.trim().length > 0
@@ -229,6 +234,7 @@ export const AiAnalystPage: React.FC<AiAnalystPageProps> = ({ dataset }) => {
         [dataset.id]: [...(prev[dataset.id] || []), assistantMsg],
       }));
     } catch {
+      window.clearTimeout(timeoutId);
       const assistantMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         role: 'assistant',

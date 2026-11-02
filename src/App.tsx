@@ -41,6 +41,11 @@ export default function App() {
 
   const [activePage, setActivePage] = useState<AppPage>('overview');
 
+  // Tracks which dataset IDs have already completed the one-time 9-second real-time inspection & blueprint reveal in this session
+  const [inspectedDatasetIds, setInspectedDatasetIds] = useState<
+    Record<string, boolean>
+  >({});
+
   const [filters, setFilters] = useState<GlobalFilterState>({
     dateFrom: '2025-01-01',
     dateTo: '2025-12-31',
@@ -138,6 +143,7 @@ export default function App() {
       ...prev.filter((d) => d.id !== newDataset.id),
     ]);
     setActiveDatasetId(newDataset.id);
+    setInspectedDatasetIds((prev) => ({ ...prev, [newDataset.id]: false }));
     sanitizeFiltersForDataset(newDataset);
     setActivePage(nextPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -159,21 +165,6 @@ export default function App() {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ dataset: updated }),
-    }).catch(() => {});
-  };
-
-  const handleDeleteDataset = (id: string) => {
-    setDatasets((prev) => {
-      const remaining = prev.filter((d) => d.id !== id);
-      if (remaining.length > 0 && activeDatasetId === id) {
-        setActiveDatasetId(remaining[0].id);
-        sanitizeFiltersForDataset(remaining[0]);
-      }
-      return remaining;
-    });
-
-    fetch(`/api/datasets/${id}`, {
-      method: 'DELETE',
     }).catch(() => {});
   };
 
@@ -223,6 +214,13 @@ export default function App() {
               filters={filters}
               onFiltersChange={setFilters}
               onNavigate={handleNavigate}
+              shouldRunLiveInspection={!inspectedDatasetIds[activeDataset.id]}
+              onInspectionComplete={() =>
+                setInspectedDatasetIds((prev) => ({
+                  ...prev,
+                  [activeDataset.id]: true,
+                }))
+              }
             />
           )}
 
@@ -230,95 +228,88 @@ export default function App() {
             <AiAnalystPage dataset={activeDataset} />
           )}
 
-          {(activePage === 'history' || activePage === 'reports') && (
-            <HistoryAndReportsPage
-              datasets={datasets}
-              activeDataset={activeDataset}
-              activeTab={activePage}
-              onTabChange={(tab) => setActivePage(tab)}
-              onSelectDataset={handleSelectDataset}
-              onDeleteDataset={handleDeleteDataset}
-            />
+          {activePage === 'reports' && (
+            <HistoryAndReportsPage activeDataset={activeDataset} />
           )}
         </main>
 
-      {/* SECTION 4: BLACK EDITORIAL FOOTER */}
-      <footer className="bg-[#09090B] text-white py-14 px-4 sm:px-6 no-print">
-        <div className="max-w-[1180px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 border-b border-white/15 pb-10">
-          <div className="space-y-2">
-            <span className="text-base font-bold tracking-tight text-white">
-              GLOBAL INSIGHT
+        {/* SECTION 4: BLACK EDITORIAL FOOTER */}
+        <footer className="bg-[#09090B] text-white py-14 px-4 sm:px-6 no-print">
+          <div className="max-w-[1180px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 border-b border-white/15 pb-10">
+            <div className="space-y-2">
+              <span className="text-base font-bold tracking-tight text-white">
+                GLOBAL INSIGHT
+              </span>
+              <p className="text-xs text-[#A1A1AA] max-w-md">
+                Automated Global E-Commerce Consumer Behaviour & Shopping Trends
+                Analytics Platform. Engineered for 1.5M+ transaction repositories.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6 text-xs font-medium text-[#A1A1AA]">
+              <button
+                type="button"
+                onClick={() => handleNavigate('overview')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Overview
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate('upload')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Upload Dataset
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate('profiling')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Schema Profiling
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate('cleaning')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Cleaning Engine
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate('analytics')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Analytics Workspace
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate('ai_analyst')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                AI Analyst
+              </button>
+              <button
+                type="button"
+                onClick={() => handleNavigate('reports')}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Reports & Exports
+              </button>
+            </div>
+          </div>
+
+          <div className="max-w-[1180px] mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#A1A1AA]">
+            <span>
+              © {new Date().getFullYear()} GLOBAL INSIGHT. Monochrome Swiss
+              Editorial System.
             </span>
-            <p className="text-xs text-[#A1A1AA] max-w-md">
-              Automated Global E-Commerce Consumer Behaviour & Shopping Trends
-              Analytics Platform. Engineered for 1.5M+ transaction repositories.
-            </p>
+            <span>
+              Columnar Parquet Architecture · Grounded Statistical AI · GSAP
+              Motion
+            </span>
           </div>
-
-          <div className="flex flex-wrap items-center gap-6 text-xs font-medium text-[#A1A1AA]">
-            <button
-              type="button"
-              onClick={() => handleNavigate('overview')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Overview
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavigate('upload')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Upload Dataset
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavigate('profiling')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Schema Profiling
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavigate('cleaning')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Cleaning Engine
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavigate('analytics')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Analytics Workspace
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavigate('ai_analyst')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              AI Analyst
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNavigate('reports')}
-              className="hover:text-white transition-colors cursor-pointer"
-            >
-              Reports & Exports
-            </button>
-          </div>
-        </div>
-
-        <div className="max-w-[1180px] mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#A1A1AA]">
-          <span>
-            © {new Date().getFullYear()} GLOBAL INSIGHT. Monochrome Swiss
-            Editorial System.
-          </span>
-          <span>
-            Columnar Parquet Architecture · Grounded Statistical AI · GSAP
-            Motion
-          </span>
-        </div>
-      </footer>
+        </footer>
       </div>
     </ProductionErrorBoundary>
   );

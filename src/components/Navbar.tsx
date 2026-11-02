@@ -9,7 +9,6 @@ export type AppPage =
   | 'cleaning'
   | 'analytics'
   | 'ai_analyst'
-  | 'history'
   | 'reports';
 
 interface NavbarProps {
@@ -27,7 +26,7 @@ const NAV_ITEMS: { id: AppPage; label: string; matchPages: AppPage[] }[] = [
     matchPages: ['analytics', 'profiling', 'cleaning'],
   },
   { id: 'ai_analyst', label: 'AI Analyst', matchPages: ['ai_analyst'] },
-  { id: 'history', label: 'History', matchPages: ['history', 'reports'] },
+  { id: 'reports', label: 'Reports', matchPages: ['reports'] },
 ];
 
 const PIPELINE_STEPS: { id: AppPage; label: string }[] = [

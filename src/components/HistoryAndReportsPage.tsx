@@ -4,38 +4,24 @@ import {
   CheckCircle2,
   Code2,
   Download,
-  ExternalLink,
-  FileSpreadsheet,
   FileText,
   Image as ImageIcon,
   Printer,
-  Trash2,
 } from 'lucide-react';
 import { DatasetEntry } from '../types/analytics';
 import { MagneticButton, useGsapPageReveal } from './gsapMotion';
-import { AppPage } from './Navbar';
 
 interface HistoryAndReportsPageProps {
-  datasets: DatasetEntry[];
   activeDataset: DatasetEntry;
-  activeTab: 'history' | 'reports';
-  onTabChange: (tab: 'history' | 'reports') => void;
-  onSelectDataset: (id: string, targetPage?: AppPage) => void;
-  onDeleteDataset: (id: string) => void;
 }
 
 export const HistoryAndReportsPage: React.FC<HistoryAndReportsPageProps> = ({
-  datasets,
   activeDataset,
-  activeTab,
-  onTabChange,
-  onSelectDataset,
-  onDeleteDataset,
 }) => {
   const pageRef = useRef<HTMLDivElement | null>(null);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
 
-  useGsapPageReveal(pageRef, [activeTab, activeDataset.id, datasets.length]);
+  useGsapPageReveal(pageRef, [activeDataset.id]);
 
   const showToast = (msg: string) => {
     setExportStatus(msg);
@@ -44,10 +30,9 @@ export const HistoryAndReportsPage: React.FC<HistoryAndReportsPageProps> = ({
 
   // Export 1: PDF Analytical Report (Print / Save as PDF)
   const handleExportPdf = () => {
-    onTabChange('reports');
     setTimeout(() => {
       window.print();
-    }, 150);
+    }, 100);
   };
 
   // Export 2: CSV Aggregated Results
@@ -215,47 +200,19 @@ def get_dashboard_aggregations(dataset_id: str):
       ref={pageRef}
       className="max-w-[1180px] mx-auto px-4 sm:px-6 pt-8 pb-20 space-y-10"
     >
-      {/* HEADER & MODE SWITCHER */}
+      {/* HEADER */}
       <div className="gsap-reveal bg-white border border-black/10 rounded-[24px] p-8 sm:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 no-print">
         <div className="space-y-2 max-w-2xl">
           <p className="text-xs font-semibold text-[#52525B] tracking-wide">
-            Repository Governance & Executive Deliverables
+            Executive Deliverables & Multi-Format Export Studio
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#09090B]">
-            {activeTab === 'history'
-              ? 'Dataset Analysis History'
-              : 'Executive Analytical Report & Exports'}
+            Executive Analytical Report & Exports
           </h1>
           <p className="text-sm text-[#52525B]">
-            {activeTab === 'history'
-              ? 'Reopen previous multi-million row analyses, compare quality scores, or manage stored repositories.'
-              : 'Export boardroom-ready PDF reports, aggregated CSV tables, multi-sheet Excel summaries, or chart snapshots.'}
+            Export boardroom-ready PDF reports, aggregated CSV tables, multi-sheet Excel summaries, or chart snapshots for{' '}
+            <strong className="text-[#09090B]">{activeDataset.name}</strong>.
           </p>
-        </div>
-
-        <div className="bg-[#E4E4E7] p-1 rounded-[7px] flex items-center gap-1 self-start lg:self-auto">
-          <button
-            type="button"
-            onClick={() => onTabChange('history')}
-            className={`px-4 py-2 text-xs font-semibold rounded-[5px] transition-colors cursor-pointer ${
-              activeTab === 'history'
-                ? 'bg-white text-[#09090B]'
-                : 'text-[#52525B] hover:text-[#09090B]'
-            }`}
-          >
-            Page 7: Dataset History ({datasets.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => onTabChange('reports')}
-            className={`px-4 py-2 text-xs font-semibold rounded-[5px] transition-colors cursor-pointer ${
-              activeTab === 'reports'
-                ? 'bg-white text-[#09090B]'
-                : 'text-[#52525B] hover:text-[#09090B]'
-            }`}
-          >
-            Page 8: Executive Reports
-          </button>
         </div>
       </div>
 
@@ -268,102 +225,10 @@ def get_dashboard_aggregations(dataset_id: str):
         </div>
       )}
 
-      {activeTab === 'history' ? (
-        /* PAGE 7: DATASET HISTORY TABLE */
-        <div className="gsap-reveal bg-white border border-black/10 rounded-[24px] p-8 sm:p-10 space-y-6">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-black/10 text-[#71717A]">
-                  <th className="py-3 pr-4">Dataset Name</th>
-                  <th className="py-3 px-3">Upload Date</th>
-                  <th className="py-3 px-3 text-right">Records</th>
-                  <th className="py-3 px-3">Processing Status</th>
-                  <th className="py-3 px-3">Analysis Completion Date</th>
-                  <th className="py-3 pl-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/5">
-                {datasets.map((ds) => {
-                  const isCurrent = ds.id === activeDataset.id;
-                  return (
-                    <tr
-                      key={ds.id}
-                      className={isCurrent ? 'bg-[#F4F4F5]' : 'hover:bg-[#F4F4F5]/60'}
-                    >
-                      <td className="py-4 pr-4">
-                        <div className="flex items-center gap-2.5">
-                          <FileSpreadsheet className="w-4 h-4 text-[#09090B] shrink-0" />
-                          <div>
-                            <p className="font-bold text-[#09090B] text-sm">
-                              {ds.name}
-                            </p>
-                            <p className="text-[11px] text-[#71717A] font-mono-tabular">
-                              {ds.fileName} · {ds.fileSizeFormatted} · Quality{' '}
-                              {ds.quality.overallScore}%
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-3 font-mono-tabular text-[#52525B]">
-                        {ds.uploadedAt}
-                      </td>
-                      <td className="py-4 px-3 text-right font-mono-tabular font-semibold text-[#09090B]">
-                        {ds.rawRowCount.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-3">
-                        <span className="inline-flex items-center gap-1.5 font-medium text-[#09090B]">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#09090B]" />
-                          {ds.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-3 font-mono-tabular text-[#52525B]">
-                        {ds.completedAt}
-                      </td>
-                      <td className="py-4 pl-3 text-right">
-                        <div className="inline-flex items-center gap-2">
-                          <MagneticButton
-                            type="button"
-                            strength={0.18}
-                            onClick={() => onSelectDataset(ds.id, 'analytics')}
-                            className="px-3 py-1.5 bg-[#09090B] hover:bg-[#27272A] text-white rounded-[7px] font-semibold cursor-pointer inline-flex items-center gap-1"
-                          >
-                            <span>Reopen Dashboard</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </MagneticButton>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onSelectDataset(ds.id, 'reports');
-                            }}
-                            className="px-3 py-1.5 bg-[#E4E4E7] hover:bg-black/15 text-[#09090B] rounded-[7px] font-semibold cursor-pointer"
-                          >
-                            View Report
-                          </button>
-                          {datasets.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => onDeleteDataset(ds.id)}
-                              title="Delete dataset from history"
-                              className="p-1.5 bg-[#E4E4E7] hover:bg-[#09090B] hover:text-white text-[#52525B] rounded-[7px] transition-colors cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        /* PAGE 8: REPORTS & EXPORT STUDIO */
-        <div className="space-y-8">
-          {/* EXPORT ACTIONS BAR */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 no-print">
+      {/* REPORTS & EXPORT STUDIO */}
+      <div className="space-y-8">
+        {/* EXPORT ACTIONS BAR */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 no-print">
             {[
               {
                 onClick: handleExportPdf,
@@ -633,7 +498,6 @@ def get_dashboard_aggregations(dataset_id: str):
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 };

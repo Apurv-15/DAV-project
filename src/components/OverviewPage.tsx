@@ -260,8 +260,8 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         </div>
       </section>
 
-      {/* SECTION 3: LIVE CAPABILITY PREVIEW & RECENT ANALYSIS HISTORY */}
-      <section className="max-w-[1180px] mx-auto px-4 sm:px-6 space-y-12">
+      {/* SECTION 3: LIVE CAPABILITY PREVIEW */}
+      <section className="max-w-[1180px] mx-auto px-4 sm:px-6">
         {/* Live Preview of Active Dataset */}
         <div className="gsap-reveal bg-white border border-[#0f172a]/10 rounded-[24px] p-8 sm:p-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 border-b border-[#0f172a]/10">
@@ -369,109 +369,6 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                   ))}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* RECENT ANALYSIS HISTORY TABLE */}
-        <div className="gsap-reveal bg-white border border-[#0f172a]/10 rounded-[24px] p-8 sm:p-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#0f172a]/10">
-            <div>
-              <h2 className="font-instrument-display text-[34px] sm:text-[42px] text-[#0f172a]">
-                Recent analysis history.
-              </h2>
-              <p className="text-sm text-[hsl(215,25%,32%)] mt-1">
-                Select any repository to inspect its profiling report, cleaning
-                audit log, or interactive dashboard.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onNavigate('history')}
-              className="text-xs font-medium text-[#0f172a] hover:opacity-75 transition-opacity flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-            >
-              <span>View Full History & Export Reports</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="overflow-x-auto mt-4">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#0f172a]/10 text-[11px] font-semibold text-[hsl(215,25%,32%)]">
-                  <th className="py-3 pr-4">Dataset Name</th>
-                  <th className="py-3 px-4">Format</th>
-                  <th className="py-3 px-4 text-right">Raw Records</th>
-                  <th className="py-3 px-4 text-right">Cleaned Records</th>
-                  <th className="py-3 px-4 text-right">Quality Score</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 pl-4 text-right">Workspace Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#0f172a]/5 text-sm">
-                {datasets.map((ds) => {
-                  const isCurrent = ds.id === activeDataset.id;
-                  return (
-                    <tr
-                      key={ds.id}
-                      className={`transition-colors ${
-                        isCurrent ? 'bg-[#F8FAFC]' : 'hover:bg-[#F8FAFC]/60'
-                      }`}
-                    >
-                      <td className="py-4 pr-4">
-                        <div className="flex items-center gap-2.5">
-                          <FileSpreadsheet className="w-4 h-4 text-[#0f172a] shrink-0" />
-                          <div>
-                            <p className="font-semibold text-[#0f172a]">
-                              {ds.name}
-                              {ds.isSampleDataset && (
-                                <span className="ml-2 text-[11px] font-normal text-[hsl(215,25%,32%)]">
-                                  · Sample Benchmark
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-xs text-[hsl(215,25%,32%)] font-mono-tabular">
-                              {ds.fileName} · {ds.fileSizeFormatted}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-xs text-[hsl(215,25%,32%)] font-mono-tabular">
-                        {ds.format}
-                      </td>
-                      <td className="py-4 px-4 text-right font-mono-tabular text-[hsl(215,25%,32%)]">
-                        {ds.rawRowCount.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-4 text-right font-mono-tabular font-semibold text-[#0f172a]">
-                        {ds.cleanedRowCount.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-4 text-right font-mono-tabular font-semibold text-[#0f172a]">
-                        {ds.quality.overallScore}%
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0f172a]">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#0f172a]" />
-                          {ds.status}
-                        </span>
-                      </td>
-                      <td className="py-4 pl-4 text-right">
-                        <MagneticButton
-                          type="button"
-                          strength={0.2}
-                          onClick={() => onSelectDataset(ds.id, 'analytics')}
-                          className={`px-6 py-2.5 rounded-full text-xs font-medium transition-transform duration-300 ease-in-out hover:scale-[1.03] cursor-pointer ${
-                            isCurrent
-                              ? 'bg-[#000000] text-white'
-                              : 'bg-[#E2E8F0] text-[#0f172a] hover:bg-[#000000] hover:text-white'
-                          }`}
-                        >
-                          {isCurrent ? 'Open Dashboard' : 'Load & Analyse'}
-                        </MagneticButton>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
           </div>
         </div>
       </section>

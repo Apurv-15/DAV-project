@@ -221,25 +221,34 @@ async function startServer() {
         });
       }
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: `${recentTurns ? `Recent Thread Context:\n${recentTurns}\n\n` : ''}User Analytical Question: "${question.trim()}"\n\nVerified Pre-Computed Dataset & Entity Telemetry Statistics (JSON):\n${contextToUse}`,
-        config: {
-          systemInstruction:
-            'You are GLOBAL INSIGHT, a senior e-commerce data scientist and executive business intelligence analyst. ' +
-            'Strictly answer the user question using ONLY the verified pre-computed numbers provided in the JSON context (including matchedEntity YoY/QoQ/MoM growth rates, monthlySeries, and topCountries when present). ' +
-            'NEVER invent, guess, or extrapolate revenue figures, customer counts, or percentages. ' +
-            'Keep your response concise (2 to 4 short paragraphs or bullet points), clear, and quantitative.',
-        },
+      const timeoutPromise = new Promise<null>((resolve) => {
+        setTimeout(() => resolve(null), 2200);
       });
 
+      const response = await Promise.race([
+        ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: `${recentTurns ? `Recent Thread Context:\n${recentTurns}\n\n` : ''}User Analytical Question: "${question.trim()}"\n\nVerified Pre-Computed Dataset & Entity Telemetry Statistics (JSON):\n${contextToUse}`,
+          config: {
+            systemInstruction:
+              'You are GLOBAL INSIGHT, a senior e-commerce data scientist and executive business intelligence analyst. ' +
+              'Strictly answer the user question using ONLY the verified pre-computed numbers provided in the JSON context (including matchedEntity YoY/QoQ/MoM growth rates, monthlySeries, and topCountries when present). ' +
+              'NEVER invent, guess, or extrapolate revenue figures, customer counts, or percentages. ' +
+              'Keep your response concise (2 to 4 short paragraphs or bullet points), clear, and quantitative.',
+          },
+        }),
+        timeoutPromise,
+      ]);
+
       const text =
-        response.text || fallbackExplanation || computed.deterministicAnswer;
+        (response && typeof response.text === 'string' && response.text.trim()) ||
+        fallbackExplanation ||
+        computed.deterministicAnswer;
       return res.json({
         answer: text,
         evidence: computed.evidence,
         sqlEquivalent: computed.sqlEquivalent,
-        source: 'gemini-3.8-flash',
+        source: response ? 'gemini-3.8-flash' : 'statistical_engine_timeout_fallback',
       });
     } catch {
       // If Gemini quota or API key is unavailable, return the verified statistical explanation seamlessly
