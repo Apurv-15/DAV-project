@@ -304,73 +304,10 @@ def get_dashboard_aggregations(dataset_id: str):
               </div>
             </div>
 
-            {/* 2. Dataset Information & 3. Data Quality */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-[#09090B]">
-                  01. Dataset Information & Processing Scope
-                </h3>
-                <p className="text-xs text-[#52525B] leading-relaxed">
-                  The source file (<strong>{activeDataset.fileName}</strong>,{' '}
-                  {activeDataset.fileSizeFormatted}) was ingested in{' '}
-                  {activeDataset.format} format containing{' '}
-                  <strong>{activeDataset.rawRowCount.toLocaleString()}</strong>{' '}
-                  raw records across <strong>{activeDataset.columnCount}</strong>{' '}
-                  attributes. Non-destructive cleaning isolated{' '}
-                  {activeDataset.beforeAfter.rawDuplicatesCount.toLocaleString()}{' '}
-                  duplicate order keys, yielding{' '}
-                  <strong>
-                    {activeDataset.cleanedRowCount.toLocaleString()}
-                  </strong>{' '}
-                  verified analytical records.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-[#09090B]">
-                  02. Data Quality Verification
-                </h3>
-                <div className="grid grid-cols-2 gap-3 text-xs font-mono-tabular">
-                  <div className="bg-[#F4F4F5] p-3 rounded-[10px]">
-                    <span className="text-[#71717A] block font-sans">
-                      Completeness
-                    </span>
-                    <strong className="text-sm text-[#09090B]">
-                      {activeDataset.quality.completeness}%
-                    </strong>
-                  </div>
-                  <div className="bg-[#F4F4F5] p-3 rounded-[10px]">
-                    <span className="text-[#71717A] block font-sans">
-                      Validity
-                    </span>
-                    <strong className="text-sm text-[#09090B]">
-                      {activeDataset.quality.validity}%
-                    </strong>
-                  </div>
-                  <div className="bg-[#F4F4F5] p-3 rounded-[10px]">
-                    <span className="text-[#71717A] block font-sans">
-                      Uniqueness
-                    </span>
-                    <strong className="text-sm text-[#09090B]">
-                      {activeDataset.quality.uniqueness}%
-                    </strong>
-                  </div>
-                  <div className="bg-[#F4F4F5] p-3 rounded-[10px]">
-                    <span className="text-[#71717A] block font-sans">
-                      Consistency
-                    </span>
-                    <strong className="text-sm text-[#09090B]">
-                      {activeDataset.quality.consistency}%
-                    </strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 4. Key Metrics */}
-            <div className="space-y-4 pt-6 border-t border-black/10">
+            {/* Key Metrics */}
+            <div className="space-y-4">
               <h3 className="text-sm font-bold text-[#09090B]">
-                03. Key Performance Metrics
+                01. Key Performance Metrics
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
                 <div className="bg-[#F4F4F5] p-4 rounded-[12px]">
@@ -412,10 +349,10 @@ def get_dashboard_aggregations(dataset_id: str):
               </div>
             </div>
 
-            {/* 5. Visualizations Summary & Regional Table */}
+            {/* Visualizations Summary & Regional Table */}
             <div className="space-y-4 pt-6 border-t border-black/10">
               <h3 className="text-sm font-bold text-[#09090B]">
-                04. Regional & Category Performance Breakdown
+                02. Regional & Category Performance Breakdown
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
@@ -457,11 +394,11 @@ def get_dashboard_aggregations(dataset_id: str):
               </div>
             </div>
 
-            {/* 6. AI-Generated Findings & 7. Strategic Conclusions */}
+            {/* AI-Generated Findings & Strategic Conclusions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-black/10">
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-[#09090B]">
-                  05. Grounded AI Analytical Findings
+                  03. Grounded AI Analytical Findings
                 </h3>
                 <ul className="space-y-2.5 text-xs text-[#52525B] leading-relaxed">
                   {activeDataset.aiInsights.map((ins) => (
@@ -475,7 +412,7 @@ def get_dashboard_aggregations(dataset_id: str):
 
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-[#09090B]">
-                  06. Executive Conclusions & Recommendations
+                  04. Executive Conclusions & Recommendations
                 </h3>
                 <p className="text-xs text-[#52525B] leading-relaxed">
                   1. <strong>Cap Promotional Markdowns at 15%:</strong> Empirical
