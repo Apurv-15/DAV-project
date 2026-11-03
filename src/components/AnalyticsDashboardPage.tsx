@@ -5,7 +5,6 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Database,
-  Download,
   Filter,
   PencilRuler,
   Play,
@@ -146,10 +145,11 @@ const PlottedKpiCard: React.FC<{
 const StaggeredPlotReveal: React.FC<{
   delay: number;
   active: boolean;
+  runKey: number;
   morph?: boolean;
   className?: string;
   children: React.ReactNode;
-}> = ({ delay, active, morph = true, className = '', children }) => {
+}> = ({ delay, active, runKey, morph = true, className = '', children }) => {
   const [ready, setReady] = useState(!active || delay === 0);
 
   useEffect(() => {
@@ -164,7 +164,7 @@ const StaggeredPlotReveal: React.FC<{
     setReady(false);
     const id = window.setTimeout(() => setReady(true), delay);
     return () => window.clearTimeout(id);
-  }, [delay, active]);
+  }, [delay, active, runKey]);
 
   if (!active) {
     return <div className={className}>{children}</div>;
@@ -172,7 +172,7 @@ const StaggeredPlotReveal: React.FC<{
 
   if (!ready) {
     return (
-      <div className={`invisible pointer-events-none ${className}`}>
+      <div className={`opacity-0 pointer-events-none select-none ${className}`}>
         {children}
       </div>
     );
@@ -180,6 +180,7 @@ const StaggeredPlotReveal: React.FC<{
 
   return (
     <PlotReveal
+      key={`plot-${runKey}-${delay}`}
       annotate={false}
       morph={morph}
       ready
@@ -199,13 +200,14 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
   onInspectionComplete,
 }) => {
   const pageRef = useRef<HTMLDivElement | null>(null);
+  const prevDatasetIdRef = useRef<string>(dataset.id);
 
   const [chartTypeOverrides, setChartTypeOverrides] = useState<
     Record<string, RecommendedChartType>
   >({});
 
   // Do NOT auto-start analysis: if `shouldRunLiveInspection` is true (dataset has not been analyzed yet in this session),
-  // wait for the user to explicitly click "Start Analytics / Analyse Dataset".
+  // wait for the user to explicitly click "Start Analytics".
   const [hasStartedAnalysis, setHasStartedAnalysis] = useState<boolean>(
     !shouldRunLiveInspection
   );
@@ -216,22 +218,25 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
   );
   const [runKey, setRunKey] = useState<number>(0);
 
-  // Sync state if the user switches to another dataset
+  // Only reset when the user switches to a DIFFERENT dataset ID
   useEffect(() => {
-    if (shouldRunLiveInspection) {
-      setHasStartedAnalysis(false);
-      setAnimateBlueprint(false);
-      setIsInspecting(false);
-      setElapsedMs(0);
-    } else {
-      setHasStartedAnalysis(true);
-      setAnimateBlueprint(false);
-      setIsInspecting(false);
-      setElapsedMs(INSPECTION_DURATION_MS);
+    if (prevDatasetIdRef.current !== dataset.id) {
+      prevDatasetIdRef.current = dataset.id;
+      if (shouldRunLiveInspection) {
+        setHasStartedAnalysis(false);
+        setAnimateBlueprint(false);
+        setIsInspecting(false);
+        setElapsedMs(0);
+      } else {
+        setHasStartedAnalysis(true);
+        setAnimateBlueprint(false);
+        setIsInspecting(false);
+        setElapsedMs(INSPECTION_DURATION_MS);
+      }
     }
   }, [dataset.id, shouldRunLiveInspection]);
 
-  // 9.2-second real-time data inspection & live telemetry progress loop (runs ONLY after user clicks Start Analytics)
+  // 9.2-second real-time data inspection & live telemetry progress loop (runs when user clicks Start Analytics)
   useEffect(() => {
     if (!isInspecting) return;
 
@@ -257,7 +262,6 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
     setIsInspecting(true);
     setElapsedMs(0);
     setRunKey((k) => k + 1);
-    onInspectionComplete?.();
   };
 
   const filteredData = useMemo(
@@ -339,13 +343,13 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
   return (
     <div
       ref={pageRef}
-      key={runKey}
       className="max-w-[1180px] mx-auto px-4 sm:px-6 pt-6 pb-20 space-y-8"
     >
       {/* EXECUTIVE HEADER */}
       <StaggeredPlotReveal
         delay={0}
         active={hasStartedAnalysis && animateBlueprint}
+        runKey={runKey}
         morph={false}
       >
         <div
@@ -402,26 +406,16 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
               type="button"
               strength={0.24}
               onClick={() => onNavigate('ai_analyst')}
-              className="px-4 py-2.5 bg-[#F4F4F5] hover:bg-[#E4E4E7] text-[#09090B] border border-black/10 text-xs font-semibold rounded-full transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 bg-[#09090B] hover:bg-[#27272A] text-white text-xs font-semibold rounded-full transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#09090B]" />
+              <Sparkles className="w-3.5 h-3.5 text-white" />
               <span data-plot="">Ask AI Analyst</span>
-            </MagneticButton>
-
-            <MagneticButton
-              type="button"
-              strength={0.22}
-              onClick={() => onNavigate('reports')}
-              className="px-4 py-2.5 bg-[#E4E4E7] hover:bg-black/15 text-[#09090B] text-xs font-semibold rounded-full transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span data-plot="">Export Report</span>
             </MagneticButton>
           </div>
         </div>
       </StaggeredPlotReveal>
 
-      {/* PRE-ANALYSIS STANDBY STATE: SHOWN BEFORE USER CLICKS "START ANALYTICS / ANALYSE" */}
+      {/* PRE-ANALYSIS STANDBY STATE: SHOWN BEFORE USER CLICKS "START ANALYTICS" */}
       {!hasStartedAnalysis ? (
         <div className="bg-white border border-black/10 rounded-[24px] p-8 sm:p-12 shadow-[0_2px_8px_rgb(2_6_23/0.04)] space-y-8">
           <div className="max-w-2xl space-y-3">
@@ -533,7 +527,7 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
           </div>
         </div>
       ) : (
-        <>
+        <div className="space-y-8">
           {/* REAL-TIME DATA INSPECTION & LIVE TELEMETRY STREAM (MONOCHROME SWISS EDITORIAL PALETTE) */}
           <div
             className={`rounded-[24px] bg-white border border-black/10 text-[#09090B] transition-all duration-500 overflow-hidden shadow-[0_2px_8px_rgb(2_6_23/0.04)] ${
@@ -678,8 +672,9 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
 
           {/* GLOBAL CROSS-FILTER BAR */}
           <StaggeredPlotReveal
-            delay={250}
+            delay={200}
             active={animateBlueprint}
+            runKey={runKey}
             morph={false}
           >
             <div
@@ -830,7 +825,11 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
           {/* TOTAL REVENUE & CORE KPI SECTION */}
           <div className="space-y-8">
             {/* TOP 6 KPI CARDS WITH BLUEPRINT SKETCH & MORPH COUNT-UP */}
-            <StaggeredPlotReveal delay={600} active={animateBlueprint}>
+            <StaggeredPlotReveal
+              delay={500}
+              active={animateBlueprint}
+              runKey={runKey}
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <PlottedKpiCard
                   title="Total Revenue"
@@ -892,8 +891,9 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
               {/* 1. Upgraded Revenue Over Time (Custom Cubic-Bezier SVG + PlotReveal Morph) */}
               <div className="lg:col-span-8 rounded-[24px]">
                 <StaggeredPlotReveal
-                  delay={1400}
+                  delay={1300}
                   active={animateBlueprint}
+                  runKey={runKey}
                   className="h-full"
                 >
                   {isChartAvailable('revenue_over_time') ? (
@@ -927,8 +927,9 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
               {/* 5. Payment Method Distribution (Donut Chart) */}
               <div className="lg:col-span-4">
                 <StaggeredPlotReveal
-                  delay={2500}
+                  delay={2400}
                   active={animateBlueprint}
+                  runKey={runKey}
                   className="h-full"
                 >
                   <div
@@ -1045,7 +1046,11 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
           </div>
 
           {/* ROW 2: CHART 3 (INTERACTIVE WORLD MAP) & CHART 2 (REVENUE BY COUNTRY) */}
-          <StaggeredPlotReveal delay={3500} active={animateBlueprint}>
+          <StaggeredPlotReveal
+            delay={3400}
+            active={animateBlueprint}
+            runKey={runKey}
+          >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div
                 data-plot-frame
@@ -1167,7 +1172,11 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
           </StaggeredPlotReveal>
 
           {/* ROW 3: CHART 4 (REVENUE BY CATEGORY) & CHART 6 (MONTHLY SALES TRENDS) */}
-          <StaggeredPlotReveal delay={4900} active={animateBlueprint}>
+          <StaggeredPlotReveal
+            delay={4600}
+            active={animateBlueprint}
+            runKey={runKey}
+          >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* 4. Revenue by Product Category */}
               <div
@@ -1328,7 +1337,11 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
           </StaggeredPlotReveal>
 
           {/* ROW 4: CHART 7 (CUSTOMER PURCHASING BEHAVIOUR) & CHART 8 (DISCOUNT VS REVENUE SCATTER) */}
-          <StaggeredPlotReveal delay={6100} active={animateBlueprint}>
+          <StaggeredPlotReveal
+            delay={5800}
+            active={animateBlueprint}
+            runKey={runKey}
+          >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* 7. Customer Purchasing Behaviour (Grouped Bar Chart) */}
               <div
@@ -1479,7 +1492,11 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
           </StaggeredPlotReveal>
 
           {/* ROW 5: CHART 9 (PRODUCT PERFORMANCE RANKED TABLE) & CHART 10 (RFM SEGMENTATION) */}
-          <StaggeredPlotReveal delay={7100} active={animateBlueprint}>
+          <StaggeredPlotReveal
+            delay={6800}
+            active={animateBlueprint}
+            runKey={runKey}
+          >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* 9. Product Performance Ranked Table */}
               <div
@@ -1652,7 +1669,7 @@ export const AnalyticsDashboardPage: React.FC<AnalyticsDashboardPageProps> = ({
             </svg>
             Replay
           </button>
-        </>
+        </div>
       )}
     </div>
   );

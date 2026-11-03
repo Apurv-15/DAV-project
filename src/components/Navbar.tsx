@@ -8,8 +8,7 @@ export type AppPage =
   | 'profiling'
   | 'cleaning'
   | 'analytics'
-  | 'ai_analyst'
-  | 'reports';
+  | 'ai_analyst';
 
 interface NavbarProps {
   activePage: AppPage;
@@ -26,7 +25,6 @@ const NAV_ITEMS: { id: AppPage; label: string; matchPages: AppPage[] }[] = [
     matchPages: ['analytics', 'profiling', 'cleaning'],
   },
   { id: 'ai_analyst', label: 'AI Analyst', matchPages: ['ai_analyst'] },
-  { id: 'reports', label: 'Reports', matchPages: ['reports'] },
 ];
 
 const PIPELINE_STEPS: { id: AppPage; label: string }[] = [
@@ -34,7 +32,6 @@ const PIPELINE_STEPS: { id: AppPage; label: string }[] = [
   { id: 'cleaning', label: '02. Cleaning Engine' },
   { id: 'analytics', label: '03. Analytics Dashboard' },
   { id: 'ai_analyst', label: '04. AI Analyst' },
-  { id: 'reports', label: '05. Export Reports' },
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -62,7 +59,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     'cleaning',
     'analytics',
     'ai_analyst',
-    'reports',
   ].includes(activePage);
 
   // GSAP Active Pill Morphing in Main Capsule Navbar
@@ -139,9 +135,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <div className="sticky top-0 z-50 pt-4 pb-2 px-4 sm:px-6 no-print pointer-events-none">
       <div className="max-w-[1180px] mx-auto flex flex-col items-center gap-2">
-        {/* Main Floating White Capsule Navigation Bar (Strict 3-Zone Contract) */}
+        {/* Main Floating White Capsule Navigation Bar */}
         <header className="w-full pointer-events-auto bg-white/95 backdrop-blur-md border border-black/10 rounded-full px-6 py-2.5 flex items-center justify-between gap-8">
-          {/* Zone 1: Brand Wordmark with subtle magnetic pull */}
+          {/* Zone 1: Brand Wordmark */}
           <MagneticButton
             type="button"
             strength={0.2}
@@ -151,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             GLOBAL INSIGHT
           </MagneticButton>
 
-          {/* Zone 2: 5 Single-Line Navigation Links with GSAP Morphing Pill */}
+          {/* Zone 2: Navigation Links with GSAP Morphing Pill */}
           <nav
             ref={navContainerRef}
             onMouseLeave={() => setHoveredNavId(null)}
@@ -192,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Zone 3: 1 Primary Action Button with GSAP Magnetic Pull */}
+          {/* Zone 3: Primary Action Button */}
           <MagneticButton
             type="button"
             strength={0.32}

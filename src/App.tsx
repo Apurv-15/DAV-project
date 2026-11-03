@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { createInitialDatasets } from './engine/analyticsEngine';
 import { AiAnalystPage } from './components/AiAnalystPage';
 import { AnalyticsDashboardPage } from './components/AnalyticsDashboardPage';
-import { HistoryAndReportsPage } from './components/HistoryAndReportsPage';
 import { AppPage, Navbar } from './components/Navbar';
 import { OverviewPage } from './components/OverviewPage';
 import { ProductionErrorBoundary } from './components/ProductionErrorBoundary';
@@ -227,10 +226,6 @@ export default function App() {
           {activePage === 'ai_analyst' && (
             <AiAnalystPage dataset={activeDataset} />
           )}
-
-          {activePage === 'reports' && (
-            <HistoryAndReportsPage activeDataset={activeDataset} />
-          )}
         </main>
 
         {/* SECTION 4: BLACK EDITORIAL FOOTER */}
@@ -288,13 +283,6 @@ export default function App() {
                 className="hover:text-white transition-colors cursor-pointer"
               >
                 AI Analyst
-              </button>
-              <button
-                type="button"
-                onClick={() => handleNavigate('reports')}
-                className="hover:text-white transition-colors cursor-pointer"
-              >
-                Reports & Exports
               </button>
             </div>
           </div>

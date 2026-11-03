@@ -74,14 +74,10 @@ export const PlotReveal = ({
   );
 
   useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setPhase("real");
-      setStage("done");
-      return;
-    }
     let alive = true;
     (async () => {
-      await Promise.race([document.fonts.ready, wait(1200)]);
+      await Promise.race([document.fonts.ready, wait(800)]);
+      await nextFrame();
       await nextFrame();
       if (!alive || !rootRef.current) return;
       setPlot(measureLabelled(rootRef.current));

@@ -18,9 +18,9 @@
 .plot-words,
 .plot-words * {
   color: transparent !important;
-  -webkit-text-stroke: 0.6px color-mix(in srgb, var(--plot, #2e6fff) 85%, transparent);
+  -webkit-text-stroke: 0.6px color-mix(in srgb, var(--plot) 85%, transparent);
   background: none !important;
-  border-color: color-mix(in srgb, var(--plot, #2e6fff) 55%, transparent) !important;
+  border-color: color-mix(in srgb, var(--plot) 55%, transparent) !important;
   box-shadow: none !important;
 }
 
@@ -31,14 +31,5 @@
 @keyframes plot-breathe {
   to {
     opacity: 0.3;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .plot-layer {
-    display: none;
-  }
-  .plot-root > .plot-content {
-    opacity: 1 !important;
   }
 }
