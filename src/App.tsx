@@ -233,11 +233,12 @@ export default function App() {
           <div className="max-w-[1180px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 border-b border-white/15 pb-10">
             <div className="space-y-2">
               <span className="text-base font-bold tracking-tight text-white">
-                GLOBAL INSIGHT
+                LUMORA
               </span>
               <p className="text-xs text-[#A1A1AA] max-w-md">
-                Automated Global E-Commerce Consumer Behaviour & Shopping Trends
-                Analytics Platform. Engineered for 1.5M+ transaction repositories.
+                Autonomous Universal Data & Document Intelligence Platform.
+                Zero-touch schema mapping, non-destructive cleaning, blueprint
+                visualizations, and grounded AI analytics for any domain.
               </p>
             </div>
 

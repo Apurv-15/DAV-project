@@ -520,23 +520,35 @@ export const UploadPage: React.FC<UploadPageProps> = ({ onDatasetCreated }) => {
     >
       {/* HEADER */}
       <div className="gsap-reveal bg-white border border-black/10 rounded-[24px] p-8 sm:p-12">
-        <div className="max-w-2xl space-y-3">
+        <div className="max-w-3xl space-y-3">
           <p className="text-xs font-semibold text-[#52525B] tracking-wide">
-            Universal Document & Stream Ingestion
+            Lumora Universal Document & Dataset Ingestion
           </p>
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#09090B]">
             Upload & validate{' '}
             <span className="font-serif-editorial font-normal text-[1.08em]">
-              commerce
+              any domain
             </span>{' '}
-            datasets & docs.
+            dataset or document.
           </h1>
           <p className="text-sm sm:text-base text-[#52525B] leading-relaxed">
-            Drop any CSV, XLSX, Parquet, JSON, PDF, Word (.docx), or text
-            document. GLOBAL INSIGHT streams chunks, extracts structured
-            records, and computes aggregations without overloading browser
-            memory.
+            Drop any CSV, XLSX, Parquet, JSON, PDF, Word (.docx), or text report
+            across Agriculture, Finance, Healthcare, Supply Chain, or Global
+            Commerce. Lumora streams chunks, auto-maps columns to analytical
+            roles, and builds your complete dashboard pipeline automatically.
           </p>
+          <div className="pt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#52525B]">
+            <span className="font-semibold text-[#09090B]">Supported Domains:</span>
+            <span>Agriculture & Crop Yields</span>
+            <span aria-hidden="true">·</span>
+            <span>Financial & Accounting Ledgers</span>
+            <span aria-hidden="true">·</span>
+            <span>Clinical & Healthcare Records</span>
+            <span aria-hidden="true">·</span>
+            <span>Global Retail & E-Commerce</span>
+            <span aria-hidden="true">·</span>
+            <span>Formal PDF / DOCX Reports</span>
+          </div>
         </div>
 
         {/* DRAG AND DROP ZONE */}

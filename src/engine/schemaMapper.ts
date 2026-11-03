@@ -12,6 +12,7 @@ const SEMANTIC_PATTERNS: Record<Exclude<SemanticFieldRole, 'unmapped'>, RegExp[]
     /^invoice[_\s-]?(no|id|num)?$/i,
     /^order[_\s-]?number$/i,
     /^txn[_\s-]?id$/i,
+    /^(record|sample|batch|observation|lot|plot)[_\s-]?(id|no|code)?$/i,
   ],
   customer_id: [
     /^cust(omer)?[_\s-]?id$/i,
@@ -20,12 +21,14 @@ const SEMANTIC_PATTERNS: Record<Exclude<SemanticFieldRole, 'unmapped'>, RegExp[]
     /^buyer[_\s-]?id$/i,
     /^member[_\s-]?id$/i,
     /^customer[_\s-]?code$/i,
+    /^(farmer|farm|grower|producer|field|station|entity|patient|employee)[_\s-]?(id|code|name)?$/i,
   ],
   product: [
     /^prod(uct)?([_\s-]?(name|title|id|desc|sku))?$/i,
     /^item([_\s-]?(name|title|id))?$/i,
     /^sku$/i,
     /^merchandise$/i,
+    /^(crop|seed|variety|cultivar|commodity|livestock|grain|produce|species|hybrid)([_\s-]?(name|type|variety))?$/i,
   ],
   category: [
     /^cat(egory)?([_\s-]?name)?$/i,
@@ -33,12 +36,14 @@ const SEMANTIC_PATTERNS: Record<Exclude<SemanticFieldRole, 'unmapped'>, RegExp[]
     /^product[_\s-]?type$/i,
     /^segment$/i,
     /^sub[_\s-]?category$/i,
+    /^(season|crop[_\s-]?group|soil[_\s-]?type|agro[_\s-]?zone|farming[_\s-]?type|sector|group|class|division|domain)$/i,
   ],
   date: [
-    /^(order|purchase|transaction|invoice|sale)[_\s-]?(date|time|timestamp|dt)$/i,
+    /^(order|purchase|transaction|invoice|sale|harvest|planting|sowing|crop|observation)[_\s-]?(date|time|timestamp|dt|year)$/i,
     /^date$/i,
     /^created[_\s-]?at$/i,
     /^timestamp$/i,
+    /^(year|crop[_\s-]?year|fiscal[_\s-]?year|month|period)$/i,
   ],
   country: [
     /^country([_\s-]?(name|code))?$/i,
@@ -47,6 +52,7 @@ const SEMANTIC_PATTERNS: Record<Exclude<SemanticFieldRole, 'unmapped'>, RegExp[]
     /^market$/i,
     /^shipping[_\s-]?country$/i,
     /^location$/i,
+    /^(state|district|province|county|zone|territory|agro[_\s-]?climatic[_\s-]?zone|city|village)$/i,
   ],
   quantity: [
     /^qty$/i,
@@ -54,6 +60,7 @@ const SEMANTIC_PATTERNS: Record<Exclude<SemanticFieldRole, 'unmapped'>, RegExp[]
     /^units([_\s-]?sold)?$/i,
     /^item[_\s-]?count$/i,
     /^order[_\s-]?qty$/i,
+    /^(area|hectares|acres|planted[_\s-]?area|harvested[_\s-]?area|land[_\s-]?area|volume|weight|tonnage|headcount|count)$/i,
   ],
   price: [
     /^(unit[_\s-]?)?price$/i,
@@ -61,27 +68,32 @@ const SEMANTIC_PATTERNS: Record<Exclude<SemanticFieldRole, 'unmapped'>, RegExp[]
     /^rate$/i,
     /^list[_\s-]?price$/i,
     /^msrp$/i,
+    /^(msp|market[_\s-]?price|cost[_\s-]?per[_\s-]?hectare|fertilizer[_\s-]?cost|input[_\s-]?cost|rainfall|rainfall[_\s-]?mm|precipitation|cost)$/i,
   ],
   revenue: [
     /^(total[_\s-]?)?(revenue|sales|amount|spend|value|gmv)$/i,
     /^order[_\s-]?(total|value|amount)$/i,
     /^net[_\s-]?(sales|revenue|amount)$/i,
     /^purchase[_\s-]?amount([_\s-]?\(usd\))?$/i,
+    /^(yield|crop[_\s-]?yield|production|total[_\s-]?production|output|harvest[_\s-]?volume|tonnes|quintals|farm[_\s-]?income|gross[_\s-]?value|metric[_\s-]?value)$/i,
   ],
   discount: [
     /^discount([_\s-]?(pct|percent|rate|amount|applied))?$/i,
     /^promo[_\s-]?discount$/i,
     /^markdown$/i,
+    /^(temperature|humidity|moisture|soil[_\s-]?moisture|fertilizer|pesticide|subsidy|variance|change[_\s-]?pct)$/i,
   ],
   payment_method: [
     /^pay(ment)?([_\s-]?(method|type|mode|channel))?$/i,
     /^tender[_\s-]?type$/i,
     /^billing[_\s-]?method$/i,
+    /^(irrigation|irrigation[_\s-]?(type|method|source)|water[_\s-]?source|farming[_\s-]?method|channel|source|mode|status)$/i,
   ],
   rating: [
     /^(customer[_\s-]?|review[_\s-]?|product[_\s-]?)?(rating|score|stars)$/i,
     /^satisfaction$/i,
     /^nps$/i,
+    /^(soil[_\s-]?ph|ph|fertility[_\s-]?index|quality[_\s-]?score|health[_\s-]?index|grade|efficiency|index)$/i,
   ],
 };
 
@@ -149,40 +161,115 @@ export function detectSemanticRole(
   }
 
   const lower = cleanName.toLowerCase();
-  if (lower.includes('order') && lower.includes('id')) {
+  if ((lower.includes('order') || lower.includes('record') || lower.includes('sample') || lower.includes('plot')) && lower.includes('id')) {
     return { role: 'order_id', confidence: 0.88, isAmbiguous: false };
   }
-  if ((lower.includes('cust') || lower.includes('user')) && lower.includes('id')) {
+  if ((lower.includes('cust') || lower.includes('user') || lower.includes('farm') || lower.includes('grower') || lower.includes('entity')) && lower.includes('id')) {
     return { role: 'customer_id', confidence: 0.88, isAmbiguous: false };
   }
-  if (lower.includes('date') || lower.includes('time')) {
+  if (lower.includes('date') || lower.includes('time') || lower.includes('year') || lower.includes('month') || lower.includes('period')) {
     return { role: 'date', confidence: 0.85, isAmbiguous: dataType !== 'date' };
   }
-  if (lower.includes('country') || lower.includes('nation') || lower.includes('location')) {
-    return { role: 'country', confidence: 0.84, isAmbiguous: false };
+  if (
+    lower.includes('country') ||
+    lower.includes('nation') ||
+    lower.includes('location') ||
+    lower.includes('state') ||
+    lower.includes('district') ||
+    lower.includes('region') ||
+    lower.includes('province') ||
+    lower.includes('zone')
+  ) {
+    return { role: 'country', confidence: 0.86, isAmbiguous: false };
   }
-  if (lower.includes('cat') || lower.includes('dept')) {
-    return { role: 'category', confidence: 0.82, isAmbiguous: false };
+  if (
+    lower.includes('cat') ||
+    lower.includes('dept') ||
+    lower.includes('season') ||
+    lower.includes('soil') ||
+    lower.includes('sector') ||
+    lower.includes('group') ||
+    lower.includes('type')
+  ) {
+    return { role: 'category', confidence: 0.84, isAmbiguous: false };
   }
-  if (lower.includes('prod') || lower.includes('item')) {
-    return { role: 'product', confidence: 0.8, isAmbiguous: false };
+  if (
+    lower.includes('prod') ||
+    lower.includes('item') ||
+    lower.includes('crop') ||
+    lower.includes('variety') ||
+    lower.includes('commodity') ||
+    lower.includes('seed') ||
+    lower.includes('species')
+  ) {
+    return { role: 'product', confidence: 0.85, isAmbiguous: false };
   }
-  if (lower.includes('rev') || lower.includes('sales') || lower.includes('total') || lower.includes('amount')) {
-    return { role: 'revenue', confidence: 0.79, isAmbiguous: true };
+  if (
+    lower.includes('rev') ||
+    lower.includes('sales') ||
+    lower.includes('total') ||
+    lower.includes('amount') ||
+    lower.includes('yield') ||
+    lower.includes('production') ||
+    lower.includes('output') ||
+    lower.includes('harvest') ||
+    lower.includes('tonnes') ||
+    lower.includes('value') ||
+    lower.includes('income')
+  ) {
+    return { role: 'revenue', confidence: 0.84, isAmbiguous: false };
   }
-  if (lower.includes('price') || lower.includes('cost')) {
-    return { role: 'price', confidence: 0.78, isAmbiguous: true };
+  if (
+    lower.includes('price') ||
+    lower.includes('cost') ||
+    lower.includes('msp') ||
+    lower.includes('rain') ||
+    lower.includes('precip')
+  ) {
+    return { role: 'price', confidence: 0.81, isAmbiguous: false };
   }
-  if (lower.includes('qty') || lower.includes('quant') || lower.includes('unit')) {
-    return { role: 'quantity', confidence: 0.82, isAmbiguous: false };
+  if (
+    lower.includes('qty') ||
+    lower.includes('quant') ||
+    lower.includes('unit') ||
+    lower.includes('area') ||
+    lower.includes('hectare') ||
+    lower.includes('acre') ||
+    lower.includes('volume') ||
+    lower.includes('weight')
+  ) {
+    return { role: 'quantity', confidence: 0.84, isAmbiguous: false };
   }
-  if (lower.includes('disc') || lower.includes('promo')) {
-    return { role: 'discount', confidence: 0.85, isAmbiguous: false };
+  if (
+    lower.includes('disc') ||
+    lower.includes('promo') ||
+    lower.includes('temp') ||
+    lower.includes('humid') ||
+    lower.includes('moist') ||
+    lower.includes('fertilizer') ||
+    lower.includes('subsidy')
+  ) {
+    return { role: 'discount', confidence: 0.82, isAmbiguous: false };
   }
-  if (lower.includes('pay')) {
-    return { role: 'payment_method', confidence: 0.86, isAmbiguous: false };
+  if (
+    lower.includes('pay') ||
+    lower.includes('irrig') ||
+    lower.includes('source') ||
+    lower.includes('method') ||
+    lower.includes('channel') ||
+    lower.includes('mode')
+  ) {
+    return { role: 'payment_method', confidence: 0.84, isAmbiguous: false };
   }
-  if (lower.includes('rat') || lower.includes('star') || lower.includes('review')) {
+  if (
+    lower.includes('rat') ||
+    lower.includes('star') ||
+    lower.includes('review') ||
+    lower.includes('ph') ||
+    lower.includes('score') ||
+    lower.includes('index') ||
+    lower.includes('grade')
+  ) {
     return { role: 'rating', confidence: 0.83, isAmbiguous: false };
   }
 
@@ -208,11 +295,61 @@ export function buildSchemaMapping(
     unmapped: null,
   };
 
+  const usedColumns = new Set<string>();
+
   for (const col of columns) {
     if (col.semanticRole !== 'unmapped' && !mapping[col.semanticRole]) {
       mapping[col.semanticRole] = col.name;
+      usedColumns.add(col.name);
     }
   }
+
+  // Universal Domain-Agnostic Fallback:
+  // If any dataset (Agricultural, Healthcare, Climate, Finance, IoT, etc.) has unmapped columns,
+  // automatically bind remaining numeric, categorical, date, and string columns to open slots
+  // so 100% of charts, KPIs, and AI queries work out-of-the-box without manual setup.
+  const unusedNumeric = columns.filter(
+    (c) => c.dataType === 'number' && !usedColumns.has(c.name)
+  );
+  const unusedCategorical = columns.filter(
+    (c) =>
+      (c.dataType === 'categorical' || c.dataType === 'string' || c.dataType === 'boolean') &&
+      !usedColumns.has(c.name)
+  );
+  const unusedDate = columns.filter(
+    (c) => c.dataType === 'date' && !usedColumns.has(c.name)
+  );
+
+  const assignFallback = (role: SemanticFieldRole, pool: ColumnProfile[]) => {
+    if (!mapping[role] && pool.length > 0) {
+      const chosen = pool.shift()!;
+      mapping[role] = chosen.name;
+      usedColumns.add(chosen.name);
+      if (chosen.semanticRole === 'unmapped') {
+        chosen.semanticRole = role;
+        chosen.semanticConfidence = 0.72;
+        chosen.statusNote = `Auto-mapped to ${role}`;
+      }
+    }
+  };
+
+  // 1. Ensure primary numerical metrics (revenue/yield/output, quantity/area, price/input, discount/factor, rating/index)
+  assignFallback('revenue', unusedNumeric);
+  assignFallback('quantity', unusedNumeric);
+  assignFallback('price', unusedNumeric);
+  assignFallback('discount', unusedNumeric);
+  assignFallback('rating', unusedNumeric);
+
+  // 2. Ensure temporal axis
+  assignFallback('date', unusedDate);
+
+  // 3. Ensure categorical & entity dimensions (category, product/crop, country/state/region, payment_method/mode)
+  assignFallback('category', unusedCategorical);
+  assignFallback('product', unusedCategorical);
+  assignFallback('country', unusedCategorical);
+  assignFallback('payment_method', unusedCategorical);
+  assignFallback('customer_id', unusedCategorical);
+  assignFallback('order_id', unusedCategorical);
 
   return mapping;
 }

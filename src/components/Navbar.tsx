@@ -144,7 +144,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onNavigate('overview')}
             className="text-sm sm:text-base font-bold tracking-tight text-[#09090B] whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#09090B]"
           >
-            GLOBAL INSIGHT
+            LUMORA
           </MagneticButton>
 
           {/* Zone 2: Navigation Links with GSAP Morphing Pill */}
